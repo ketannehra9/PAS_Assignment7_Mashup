@@ -1,0 +1,5 @@
+__pycache__/
+temp_downloads/
+*.mp3
+*.zip
+.DS_Store
