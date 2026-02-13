@@ -1,93 +1,102 @@
-# Mashup Assignment
+# PAS_Assignment7
+# YouTube Mashup Generator
 
-A Python-based mashup generator that downloads YouTube videos of a specified singer, extracts audio, trims clips, and merges them into a single MP3 file.  
-Includes both a CLI tool and a Flask web interface.
+
+This project implements a command-line Python program and a Flask web service to create a mashup of audio clips from YouTube videos.
+
+---
+
+## 📌 Implementation Details
+
+As required, all core functionality is implemented using libraries from **pypi.org**:
+
+- **Downloading:** `yt-dlp`
+- **Conversion to Audio:** `moviepy`
+- **Audio Cutting:** `moviepy`
+- **Merging Audio Files:** `moviepy`
 
 ---
 
 ## 📁 Project Structure
 
 ```
-Mashup-Assignment/
-├── 102303871.py      # CLI script
-├── app.py            # Flask web app
+.
+├── 102303871.py  
+├── app.py      
 ├── templates/
-│   └── index.html    # Frontend
-└── README.md
+│   └── index.html
+└── README.md       
 ```
 
 ---
 
-## ⚙️ Requirements
+## ⚙️ Setup
 
-- Python 3.x  
-- FFmpeg (audio processing)  
-  - Mac: `brew install ffmpeg`  
-  - Windows: Install and add to PATH  
-- Node.js (required for yt-dlp YouTube access)  
-  - Mac: `brew install node`
+### System Requirements
+- Python 3.13+
+- FFmpeg  
+  ```bash
+  brew install ffmpeg
+  ```
+- Node.js or Deno (for yt-dlp YouTube access)  
+  ```bash
+  brew install deno
+  ```
 
-Install Python dependencies:
+### Install Dependencies
 
 ```bash
-pip install flask yt-dlp pydub
+pip3 install yt-dlp "moviepy<2.0" flask
 ```
 
 ---
 
 ## 🚀 Usage
 
-### 1️⃣ CLI
+### CLI
 
 ```bash
-python3 102303871.py "<SingerName>" <NumberOfVideos> <Duration> <OutputFileName>
+python 102303871.py "<SingerName>" <NumberOfVideos> <AudioDuration> <OutputFileName>
 ```
 
 Example:
 
 ```bash
-python3 102303871.py "Sidhu Moose Wala" 20 30 mashup.mp3
+python 102303871.py "Sidhu Moose Wala" 12 30 output.mp3
 ```
 
-**Parameters:**
-- `SingerName` – Artist name  
-- `NumberOfVideos` – Must be > 10  
-- `Duration` – Clip duration in seconds (Must be > 20)  
-- `OutputFileName` – Final MP3 file name  
+Constraints:
+- `NumberOfVideos > 10`
+- `AudioDuration > 20`
 
 ---
 
-### 2️⃣ Web App
-
-Start server:
+### Web Service
 
 ```bash
-python3 app.py
+python app.py
 ```
 
 Open:
 
 ```
-http://127.0.0.1:5000/
+http://127.0.0.1:5000
 ```
 
-Fill the form (Singer, Count, Duration, Email) and submit.  
-Mashup is processed and delivered automatically.
+Enter singer name, video count, duration, and email.  
+The mashup is processed and delivered as a ZIP file.
 
 ---
 
-## 📝 Notes
+## ✅ Features
 
-- Stable internet required.
-- Node.js handles YouTube JS challenges.
-- Temporary files are auto-deleted (`temp_downloads/`).
+- Input validation (`N > 10`, `Duration > 20`)
+- Error handling for invalid inputs and network issues
+- Automatic processing and file delivery
+- Clean CLI + Web interface support
 
 ---
 
 ## 🛠 Tech Stack
 
-Python • Flask • yt-dlp • pydub • FFmpeg • HTML
-
----
-
-**Author:** 102303871
+Python • Flask • yt-dlp • MoviePy • FFmpeg
