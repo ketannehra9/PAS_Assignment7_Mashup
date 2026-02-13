@@ -62,7 +62,7 @@ python 102303871.py "<SingerName>" <NumberOfVideos> <AudioDuration> <OutputFileN
 Example:
 
 ```bash
-python 102303871.py "Sidhu Moose Wala" 12 30 output.mp3
+python 102303871.py "Javed Ali" 12 25 output.mp3
 ```
 
 Constraints:
