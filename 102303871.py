@@ -1,111 +1,106 @@
 import sys
 import os
-import time
+import yt_dlp
+from moviepy.editor import AudioFileClip, concatenate_audioclips
 
 def main():
-    
-    # check 1: no of params
+    # check 1: no of args
     if len(sys.argv) != 5:
-        print("ERROR! Correct format is: \npython <program.py> <SingerName> <NumberOfVideos> <AudioDuration> <OutputFileName>")
+        print("Usage: python <program.py> <SingerName> <NumberOfVideos> <AudioDuration> <OutputFileName>")
         sys.exit(1)
 
-    singer_name = sys.argv[1]
+    singer = sys.argv[1]
     
-    # check 2: datatype error
+    # check 2: datatype 
     try:
-        num_videos = int(sys.argv[2])
-        duration = int(sys.argv[3])
+        n = int(sys.argv[2])
+        y = int(sys.argv[3])
     except:
-        print("ERROR! Datatype Error: integers only for count and duration")
+        print("Error: integers only for count and duration")
         sys.exit(1)
 
-    output_file = sys.argv[4]
+    outfile = sys.argv[4]
 
-    # check 3: no of vids
-    if num_videos < 10:
-        print("ERROR!: Need more than 10 videos")
+    # check 3: no of songs
+    if n < 10:
+        print("Error: Need more than 10 videos")
         sys.exit(1)
         
-    # check 4: no of secs 
-    if duration < 20:
+    # check 4: no of secs
+    if y < 20:
         print("Error: Duration must be > 20")
         sys.exit(1)
 
-
-    print(f"Mashup for {singer_name}...")
+    print(f"Processing {singer}...")
     
     if not os.path.exists('temp_downloads'):
         os.makedirs('temp_downloads')
 
 
-    existing_files = [f for f in os.listdir('temp_downloads') if f.endswith('.mp3')]
+    search_query = f"ytsearch{n}:{singer}"
     
-    # if there are enough files, then stop further downlaod
-    if len(existing_files) >= num_videos:
-        print(f"Found {len(existing_files)} existing files. Skipping download.")
+    ydl_opts = {
+        'format': 'bestaudio/best',
+        'outtmpl': 'temp_downloads/%(title)s.%(ext)s',
+        'quiet': True,
+        'noplaylist': True,
+        'overwrites': {'remote_components': 'ejs:github'} 
+    }
+
+    try:
+        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+            ydl.download([search_query])
+    except Exception as e:
+        print(e)
+
+
+    print("Converting and cutting audio...")
+    
+    all_files = [f for f in os.listdir('temp_downloads')]
+    
+    clips = []
+    count = 0
+    
+    for filename in all_files:
+        if count == n:
+            break
+            
+        file_path = os.path.join('temp_downloads', filename)
         
+        try:
+            audio = AudioFileClip(file_path)
+            
+            # cutting the first Y seconds
+            cut_audio = audio.subclip(0, y)
+            clips.append(cut_audio)
+            count += 1
+            
+        except Exception as e:
+            print(f"Skipping {filename} due to error")
+            continue
+
+
+    print("Merging audios...")
+    
+    # check : if no files found
+    if len(clips) > 0:
+        final_clip = concatenate_audioclips(clips)
+        final_clip.write_audiofile(outfile)
+        print(f"Done! Saved {outfile}")
     else:
-        print(f"Downloading {num_videos} videos...")
-        search_query = f"ytsearch{num_videos}:{singer_name}"
+        print("No audio clips processed")
         
-        # automatic max-download 
-        cmd_download = (
-            f'python3 -m yt_dlp '
-            f'"{search_query}" '
-            f'-x --audio-format mp3 '
-            f'--remote-components ejs:github '
-            f'--max-downloads {num_videos} '
-            f'-o "temp_downloads/%(title)s.%(ext)s" '
-        )
-        
-        os.system(cmd_download)
-
-
-    print("Processing audio...  ")
     
-    files = [f for f in os.listdir('temp_downloads') if f.endswith('.mp3')]
-    files = files[:num_videos]
-    
-    # check : no files found
-    if len(files) == 0:
-        print("ERROR! : No files found to process.")
-        sys.exit(1)
-    
-    concat_list = open("concat_list.txt", "w")
-    
-    for i, f in enumerate(files):
-        input_path = os.path.join('temp_downloads', f)
+    # cleanup
+    for c in clips:
+        c.close()
         
-        safe_name = f"video_{i}.mp3"
-        safe_path = os.path.join('temp_downloads', safe_name)
-        
-        # renaming to avoid special character errors
-        if os.path.exists(input_path) and input_path != safe_path:
-             os.rename(input_path, safe_path)
-        
-        cut_path = os.path.join('temp_downloads', f"cut_{i}.mp3")
-        
-        
-        cmd_cut = f'ffmpeg -y -i "{safe_path}" -ss 0 -t {duration} -c:a libmp3lame -q:a 4 "{cut_path}" -loglevel quiet'
-        os.system(cmd_cut)
-        
-        concat_list.write(f"file 'temp_downloads/cut_{i}.mp3'\n")
-        
-    concat_list.close()
-
-    print("Merging...")
-    
-    cmd_merge = f'ffmpeg -y -f concat -safe 0 -i concat_list.txt -c copy "{output_file}" -loglevel quiet'
-    os.system(cmd_merge)
-
-    print(f"Done! Saved {output_file}")
-    
-    
-    # clean temp folders
     for f in os.listdir('temp_downloads'):
-        os.remove(os.path.join('temp_downloads', f))
+        try:
+            os.remove(os.path.join('temp_downloads', f))
+        except:
+            pass
     os.rmdir('temp_downloads')
-    os.remove("concat_list.txt")
 
 if __name__ == "__main__":
     main()
