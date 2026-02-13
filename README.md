@@ -100,3 +100,10 @@ The mashup is processed and delivered as a ZIP file.
 ## 🛠 Tech Stack
 
 Python • Flask • yt-dlp • MoviePy • FFmpeg
+
+---
+
+## Demo of web app
+<img width="413" height="367" alt="demo-web-app" src="https://github.com/user-attachments/assets/00f11451-4ee8-4b1a-98fe-02b11d826a4d" />
+
+
